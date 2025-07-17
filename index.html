@@ -354,6 +354,10 @@
                         const option = document.createElement('option');
                         option.value = product.width;
                         option.textContent = `${product.width}mm`;
+                        // 1000mm를 기본 선택으로 설정
+                        if (product.width === 1000) {
+                            option.selected = true;
+                        }
                         widthSelect.appendChild(option);
                     });
             } else {
@@ -362,6 +366,10 @@
                     const option = document.createElement('option');
                     option.value = product.width;
                     option.textContent = `${product.width}mm`;
+                    // 1000mm를 기본 선택으로 설정
+                    if (product.width === 1000) {
+                        option.selected = true;
+                    }
                     widthSelect.appendChild(option);
                 });
             }
