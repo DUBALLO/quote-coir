@@ -170,33 +170,6 @@
         </div>
         
         <div id="resultContainer" class="result-container bg-white rounded-lg p-6 shadow-md hidden">
-            <div class="print-only print-container">
-                <div class="text-center mb-8">
-                    <h1 class="text-2xl font-bold">보행매트 견적서</h1>
-                    <p class="text-gray-500">발행일: <span id="quoteDate">2025년 7월 17일</span></p>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <h2 class="text-lg font-bold border-b-2 border-gray-300 pb-2 mb-2">견적 요청자</h2>
-                        <p class="font-medium">고객명(기관명): <span id="printCustomerName">_________________</span></p>
-                        <p>연락처: <span id="printCustomerPhone">_________________</span></p>
-                        <p>이메일: <span id="printCustomerEmail">_________________</span></p>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold border-b-2 border-gray-300 pb-2 mb-2">공급자</h2>
-                        <p class="font-medium">두발로㈜</p>
-                        <p>대표자: 박대근</p>
-                        <p>사업자등록번호: 769-86-01460</p>
-                        <p>사업장소재지: 경기도 양주시 광적면 광적로 221-8</p>
-                        <p>업태: 제조업</p>
-                        <p>종목: 특수직물직조업</p>
-                        <p>전화번호: 031-866-8872</p>
-                        <p>팩스번호: 0503-8379-3363</p>
-                    </div>
-                </div>
-            </div>
-            
             <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">견적 결과</h2>
             
             <div class="space-y-4">
@@ -260,13 +233,6 @@
                         새 견적 작성
                     </button>
                 </div>
-                
-                <div class="print-only mt-16">
-                    <div class="border-t-2 border-gray-300 pt-4 mt-8 text-center">
-                        <div style="height: 80px; width: 200px; margin: 0 auto 10px auto; background-color: #22c55e; border-radius: 50px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">두발로 로고</div>
-                        <p class="mt-2 font-medium">두발로㈜</p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -307,7 +273,7 @@
         const resultContainer = document.getElementById('resultContainer');
         const quoteItems = document.getElementById('quoteItems');
         const totalAmount = document.getElementById('totalAmount');
-        const printBtn = document.getElementById('printBtn');
+        const emailBtn = document.getElementById('emailBtn');
         const newQuoteBtn = document.getElementById('newQuoteBtn');
         const quoteDate = document.getElementById('quoteDate');
         const expiryDate = document.getElementById('expiryDate');
@@ -317,8 +283,8 @@
         const today = new Date();
         const oneMonthLater = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
         
-        quoteDate.textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-        expiryDate.textContent = `${oneMonthLater.getFullYear()}년 ${oneMonthLater.getMonth() + 1}월 ${oneMonthLater.getDate()}일`;
+        if (quoteDate) quoteDate.textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+        if (expiryDate) expiryDate.textContent = `${oneMonthLater.getFullYear()}년 ${oneMonthLater.getMonth() + 1}월 ${oneMonthLater.getDate()}일`;
 
         // 타입 선택에 따른 폭 옵션 필터링
         function updateWidthOptions(index) {
@@ -614,6 +580,40 @@
             return true;
         }
 
+        // 견적 데이터 수집 함수
+        function collectQuoteData() {
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const customerEmail = document.getElementById('customerEmail').value.trim();
+            
+            // 견적 항목들 수집
+            const items = [];
+            const rows = quoteItems.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const cells = row.cells;
+                if (cells.length >= 6) {
+                    items.push({
+                        name: cells[0].textContent.trim(),
+                        code: cells[1].textContent.trim(),
+                        spec: cells[2].textContent.trim(),
+                        unitPrice: cells[3].textContent.replace(/[^\d]/g, ''),
+                        quantity: cells[4].textContent.trim(),
+                        amount: cells[5].textContent.replace(/[^\d]/g, '')
+                    });
+                }
+            });
+            
+            return {
+                customerName: customerName,
+                email: customerEmail,
+                phone: customerPhone,
+                items: items,
+                totalAmount: totalAmount.textContent.replace(/[^\d]/g, ''),
+                privacyConsent: true
+            };
+        }
+
         // 이메일 발송 기능
         async function handleEmailSend() {
             // 고객 정보 유효성 검사
@@ -654,231 +654,6 @@
                 emailBtn.textContent = '견적서 이메일 발송';
             }
         }
-        
-        // 견적 데이터 수집 함수
-        function collectQuoteData() {
-            const customerName = document.getElementById('customerName').value.trim();
-            const customerPhone = document.getElementById('customerPhone').value.trim();
-            const customerEmail = document.getElementById('customerEmail').value.trim();
-            
-            // 견적 항목들 수집
-            const items = [];
-            const rows = quoteItems.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const cells = row.cells;
-                if (cells.length >= 6) {
-                    items.push({
-                        name: cells[0].textContent.trim(),
-                        code: cells[1].textContent.trim(),
-                        spec: cells[2].textContent.trim(),
-                        unitPrice: cells[3].textContent.replace(/[^\d]/g, ''),
-                        quantity: cells[4].textContent.trim(),
-                        amount: cells[5].textContent.replace(/[^\d]/g, '')
-                    });
-                }
-            });
-            
-            return {
-                customerName: customerName,
-                email: customerEmail,
-                phone: customerPhone,
-                items: items,
-                totalAmount: totalAmount.textContent.replace(/[^\d]/g, ''),
-                privacyConsent: true
-            };
-        }
-            // 고객 정보 유효성 검사
-            if (!validateCustomerInfo()) {
-                return;
-            }
-            
-            // 고객 정보를 인쇄용으로 복사
-            const customerName = document.getElementById('customerName').value.trim();
-            const customerPhone = document.getElementById('customerPhone').value.trim();
-            const customerEmail = document.getElementById('customerEmail').value.trim() || '_________________';
-            
-            document.getElementById('printCustomerName').textContent = customerName;
-            document.getElementById('printCustomerPhone').textContent = customerPhone;
-            document.getElementById('printCustomerEmail').textContent = customerEmail;
-            
-            // 새 창에 인쇄할 내용 생성
-            const printWindow = window.open('', '_blank', 'width=800,height=600');
-            
-            // HTML 문서 작성
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>보행매트 견적서</title>
-                    <meta charset="UTF-8">
-                    <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
-                        body {
-                            font-family: 'Noto Sans KR', sans-serif;
-                            padding: 0;
-                            margin: 0;
-                            background-color: white;
-                        }
-                        .print-container {
-                            padding: 20px;
-                            width: 210mm;
-                            min-height: 297mm;
-                            margin: 0 auto;
-                            background-color: white;
-                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                        }
-                        .text-center { text-align: center; }
-                        .text-right { text-align: right; }
-                        .text-left { text-align: left; }
-                        .mb-8 { margin-bottom: 2rem; }
-                        .mb-4 { margin-bottom: 1rem; }
-                        .mt-8 { margin-top: 2rem; }
-                        .mt-16 { margin-top: 4rem; }
-                        .pb-2 { padding-bottom: 0.5rem; }
-                        .pt-4 { padding-top: 1rem; }
-                        .p-4 { padding: 1rem; }
-                        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-                        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-                        .grid { display: grid; }
-                        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-                        .gap-8 { gap: 2rem; }
-                        .border-b { border-bottom: 1px solid #e5e7eb; }
-                        .border-t { border-top: 1px solid #e5e7eb; }
-                        .border-b-2 { border-bottom: 2px solid #e5e7eb; }
-                        .border-t-2 { border-top: 2px solid #e5e7eb; }
-                        .text-2xl { font-size: 1.5rem; }
-                        .text-xl { font-size: 1.25rem; }
-                        .text-lg { font-size: 1.125rem; }
-                        .text-sm { font-size: 0.875rem; }
-                        .font-bold { font-weight: 700; }
-                        .font-medium { font-weight: 500; }
-                        .text-gray-500 { color: #6b7280; }
-                        .text-gray-800 { color: #1f2937; }
-                        .text-blue-700 { color: #1d4ed8; }
-                        .bg-gray-50 { background-color: #f9fafb; }
-                        .rounded-md { border-radius: 0.375rem; }
-                        .space-y-4 > * + * { margin-top: 1rem; }
-                        table { width: 100%; border-collapse: collapse; }
-                        .print-btn {
-                            display: block;
-                            margin: 20px auto;
-                            padding: 10px 20px;
-                            background-color: #3b82f6;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            font-weight: 500;
-                            cursor: pointer;
-                        }
-                        .print-btn:hover {
-                            background-color: #2563eb;
-                        }
-                        .logo-container {
-                            text-align: center;
-                            margin-top: 2rem;
-                        }
-                        .logo-image {
-                            max-height: 80px;
-                            margin: 0 auto 10px auto;
-                            display: block;
-                        }
-                        @page {
-                            size: A4;
-                            margin: 10mm;
-                        }
-                        @media print {
-                            .print-btn {
-                                display: none;
-                            }
-                            body {
-                                margin: 0;
-                                padding: 0;
-                            }
-                            .print-container {
-                                width: 100%;
-                                box-shadow: none;
-                                padding: 0;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="print-container">
-                        <div class="text-center mb-8">
-                            <h1 class="text-2xl font-bold">보행매트 견적서</h1>
-                            <p class="text-gray-500">발행일: ${quoteDate.textContent}</p>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-8 mb-8">
-                            <div>
-                                <h2 class="text-lg font-bold border-b-2 border-gray-300 pb-2 mb-2">견적 요청자</h2>
-                                <p class="font-medium">고객명(기관명): ${customerName}</p>
-                                <p>연락처: ${customerPhone}</p>
-                                <p>이메일: ${customerEmail}</p>
-                            </div>
-                            <div>
-                                <h2 class="text-lg font-bold border-b-2 border-gray-300 pb-2 mb-2">공급자</h2>
-                                <p class="font-medium">두발로㈜</p>
-                                <p>대표자: 박대근</p>
-                                <p>사업자등록번호: 769-86-01460</p>
-                                <p>사업장소재지: 경기도 양주시 광적면 광적로 221-8</p>
-                                <p>업태: 제조업</p>
-                                <p>종목: 특수직물직조업</p>
-                                <p>전화번호: 031-866-8872</p>
-                                <p>팩스번호: 0503-8379-3363</p>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">견적 결과</h2>
-                            <div class="bg-gray-50 p-4 rounded-md print-break-inside-avoid">
-                                <table class="w-full text-sm">
-                                    <thead>
-                                        <tr class="border-b">
-                                            <th class="text-left py-2">품목</th>
-                                            <th class="text-left py-2">물품식별번호</th>
-                                            <th class="text-left py-2">규격</th>
-                                            <th class="text-right py-2">단가</th>
-                                            <th class="text-right py-2">수량</th>
-                                            <th class="text-right py-2">금액</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${quoteItems.innerHTML}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr class="border-t">
-                                            <td colspan="5" class="text-right py-3 font-medium">총 견적 금액</td>
-                                            <td class="text-right py-3 font-bold text-blue-700">${totalAmount.textContent}</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <div class="text-sm text-gray-500">
-                                <p>※ 인도조건: 납품장소 하차도</p>
-                                <p>※ 부가세 포함</p>
-                                <p>※ 견적 유효기간: ${expiryDate.textContent}까지</p>
-                            </div>
-                            <div class="logo-container mt-16">
-                                <div class="border-t-2 border-gray-300 pt-4">
-                                    <div style="height: 80px; width: 200px; margin: 0 auto 10px auto; background-color: #22c55e; border-radius: 50px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">두발로 로고</div>
-                                    <p class="font-medium">두발로㈜</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="print-btn" onclick="window.print();">인쇄하기</button>
-                </body>
-                </html>
-            `);
-            
-            printWindow.document.close();
-        }
-
-        // 이메일 발송 버튼 이벤트
-        const emailBtn = document.getElementById('emailBtn');
-        emailBtn.addEventListener('click', handleEmailSend);
 
         // 새 견적 작성
         function handleNewQuote() {
@@ -896,6 +671,9 @@
             document.getElementById('validationError').style.display = 'none';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // 이메일 발송 버튼 이벤트
+        emailBtn.addEventListener('click', handleEmailSend);
 
         // 새 견적 작성 버튼 이벤트
         newQuoteBtn.addEventListener('click', handleNewQuote);
