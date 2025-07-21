@@ -614,7 +614,7 @@
             };
         }
 
-        // 이메일 발송 기능
+        // 이메일 발송 기능 (수정된 버전)
         async function handleEmailSend() {
             // 고객 정보 유효성 검사
             if (!validateCustomerInfo()) {
@@ -628,30 +628,31 @@
             try {
                 // 견적 데이터 수집
                 const quoteData = collectQuoteData();
+                console.log('전송할 데이터:', quoteData);
                 
-                // 구글 앱스 스크립트로 발송 (form 형태로 전송)
-                const formData = new FormData();
-                formData.append('data', JSON.stringify(quoteData));
+                // URL 인코딩된 form 데이터로 전송
+                const formBody = 'data=' + encodeURIComponent(JSON.stringify(quoteData));
                 
                 const response = await fetch('https://script.google.com/macros/s/AKfycbyq6OwbfmYR172UArM7r8jf3nqBFbzx8dyMYFgtCMezHj5VpgSrZLhD8NZDHV1qI585Xg/exec', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formBody
                 });
                 
-                // 일단 성공으로 처리 (CORS 때문에 응답 확인 어려움)
-                alert('✅ 견적서 발송 요청이 완료되었습니다!\n이메일을 확인해주세요.\n\n만약 이메일이 오지 않으면 입력 정보를 다시 확인해주세요.');
+                const result = await response.json();
+                console.log('응답:', result);
+                
+                if (result.success) {
+                    alert('✅ 견적서가 성공적으로 발송되었습니다!\n입력하신 이메일을 확인해주세요.');
+                } else {
+                    throw new Error(result.message || '발송 중 오류가 발생했습니다.');
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
-                
-                // 에러가 나도 실제로는 발송되었을 수 있음
-                const confirmSend = confirm('⚠️ 네트워크 오류가 발생했지만 견적서가 발송되었을 수 있습니다.\n\n이메일을 확인해보시겠어요?\n\n확인: 이메일 체크\n취소: 다시 시도');
-                
-                if (!confirmSend) {
-                    emailBtn.disabled = false;
-                    emailBtn.textContent = '견적서 이메일 발송';
-                    return;
-                }
+                alert('❌ 견적서 발송에 실패했습니다.\n잠시 후 다시 시도해주세요.');
             } finally {
                 emailBtn.disabled = false;
                 emailBtn.textContent = '견적서 이메일 발송';
