@@ -634,17 +634,20 @@
                 const formBody = 'data=' + encodeURIComponent(JSON.stringify(quoteData));
                 
                 // no-cors 모드로 전송 (CORS 우회)
-                const response = await fetch('https://script.google.com/macros/s/AKfycbw7cQQQtTvdxNQq6qkOW37HBbp8IMpqBQtFbHy6TIFW0btxZM0-qarN8t36a9k4Mc24/exec', {
+                fetch('https://script.google.com/macros/s/AKfycbw7cQQQtTvdxNQq6qkOW37HBbp8IMpqBQtFbHy6TIFW0btxZM0-qarN8t36a9k4Mc24/exec', {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
                     body: formBody
+                }).then(() => {
+                    console.log('요청 전송 완료');
+                }).catch(error => {
+                    console.log('전송 에러:', error);
                 });
                 
-                // no-cors에서는 응답을 읽을 수 없으므로 성공으로 가정
-                console.log('요청 전송 완료');
+                // 응답을 기다리지 않고 바로 성공 처리
                 alert('✅ 견적서 발송 요청이 완료되었습니다!\n잠시 후 이메일을 확인해주세요.');
                 
             } catch (error) {
